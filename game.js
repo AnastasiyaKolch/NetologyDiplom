@@ -172,7 +172,7 @@ class Fireball extends Actor {
 	}
 	get type() {
 			return 'fireball';
-	};
+	}
 	getNextPosition(time = 1) {
 		return this.speed.times(time).plus(this.position);
 	}
@@ -184,8 +184,8 @@ class Fireball extends Actor {
 			this.position = newPosition(time);
 	} else {
 			this.handleObstacle();
-	}
- }
+	  }
+  }
 }
 
 class HorizontalFireball extends Fireball {
@@ -270,6 +270,3 @@ const parser = new LevelParser(actorDict);
 loadLevels().then(levels => {
 	return runGame(JSON.parse(levels), parser, DOMDisplay)
 }).then(result => alert('Вы выиграли!'));
-
-
-
