@@ -6,12 +6,10 @@ class Vector {
     this.y = y;
   }
   plus(vector) {
-    // лучше сначала проверять аргументы, а потом писать основной код
-    // (как ниже, в конктрукторе класса Actor)
     if (!(vector instanceof Vector)) {
-    throw new Error('Можно прибавлять к вектору только вектор типа Vector');
+      throw new Error('Можно прибавлять к вектору только вектор типа Vector');
     }
-      return new Vector(this.x + vector.x, this.y + vector.y);
+    return new Vector(this.x + vector.x, this.y + vector.y);
   }
   times(factor) {
     return new Vector(this.x * factor, this.y * factor);
@@ -26,7 +24,6 @@ class Actor {
     this.pos = pos;
     this.size = size;
     this.speed = speed;
-    // act должен быть методом класса
   }
   act() {
   }
@@ -102,17 +99,18 @@ class Level {
     }	
   }
   removeActor(actor) {
-    // если значение присваивается переменной 1 раз,
-    // то лучше использовать const
     const index = this.actors.indexOf(actor);
     if (index >= 0) {
         this.actors.splice(index, 1);
     }
   }
   noMoreActors(actorType) {
-    // лучше использовать стрелочную функцию
-    return !this.actors.some(el => el.actorType === actorType)
-  }
+    if (this.actors.find(el => el.type === actorType)) {
+        return false;
+    }
+
+    return true;
+}
   playerTouched(obstruction, movingObject) {
     if (this.status) {
       return;
