@@ -109,7 +109,7 @@ class Level {
       return false;
     }
     return true;
-}
+  }
   playerTouched(obstruction, movingObject) {
     if (this.status) {
       return;
