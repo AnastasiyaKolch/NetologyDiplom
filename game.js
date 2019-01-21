@@ -138,15 +138,12 @@ class LevelParser {
   obstacleFromSymbol(symbol) {
     if(symbol === 'x') {
       return 'wall';
-    // если if заканчивается на return, то else можно не писать
     }
     if (symbol === '!') {
       return 'lava';
     }
   }
   createGrid(plan) {
-    // преобразовывать строки в массивы лучше с помощью метода split
-    // так понятнее, что в переменной строка
     return plan.map(string => string.split('')).map(string => string.map(string => this.obstacleFromSymbol(string))); 
   }
   createActors(stringsArray) {
@@ -174,9 +171,6 @@ class LevelParser {
 class Fireball extends Actor {
   constructor(pos = new Vector(0, 0), speed = new Vector(0, 0)) {
     super(pos, new Vector(1, 1), speed);
-      // поле для позиции это pos
-      // pos, size, speed должны задаваться через
-      // вызов родительского конструктора
   }
   get type() {
       return 'fireball';
@@ -188,8 +182,6 @@ class Fireball extends Actor {
     this.speed = this.speed.times(-1);
   }
   act(time, level) {
-    // тут ошибка (newPosition не определено)
-    // и форматирование поехало
     const newPosition = this.getNextPosition(time);
     if (level.obstacleAt(newPosition, this.size)) {
       this.handleObstacle();
