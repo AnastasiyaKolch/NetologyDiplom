@@ -6,6 +6,8 @@ class Vector {
     this.y = y;
   }
   plus(vector) {
+    // лучше сначала проверять аргументы, а потом писать основной код
+    // (как ниже, в конктрукторе класса Actor)
     if (vector instanceof Vector) {
       return new Vector(this.x + vector.x, this.y + vector.y);
     }
@@ -24,6 +26,7 @@ class Actor {
     this.pos = pos;
     this.size = size;
     this.speed = speed;
+    // act должен быть методом класса
     this.act = function() {};
   }
   get left() {
@@ -98,13 +101,17 @@ class Level {
     }	
   }
   removeActor(actor) {
+    // если значение присваивается переменной 1 раз,
+    // то лучше использовать const
     let index = this.actors.indexOf(actor);
     if (index >= 0) {
         this.actors.splice(index, 1);
     }
   }
   noMoreActors(actorType) {
+    // лучше использовать стрелочную функцию
     return !this.actors.some(function (actor) {
+      // лучше всегда использовать ===
       return actorType == actor.type;
     })
   }
@@ -135,11 +142,14 @@ class LevelParser {
   obstacleFromSymbol(symbol) {
     if(symbol === 'x') {
       return 'wall';
+    // если if заканчивается на return, то else можно не писать
     } else if (symbol === '!') {
       return 'lava';
     }
   }
   createGrid(stringsArray) {
+    // преобразовывать строки в массивы лучше с помощью метода split
+    // так понятнее, что в переменной строка
     return stringsArray.map(string => [...string].map(newString => this.obstacleFromSymbol(newString)));
   }
   createActors(stringsArray) {
@@ -167,7 +177,10 @@ class LevelParser {
 class Fireball extends Actor {
   constructor(position = new Vector(0, 0), speed = new Vector(0, 0)) {
       super(position, speed);
+      // поле для позиции это pos
       this.position = position;
+      // pos, size, speed должны задаваться через
+      // вызов родительского конструктора
       this.speed = speed;
   }
   get type() {
@@ -180,6 +193,8 @@ class Fireball extends Actor {
     this.speed = this.speed.times(-1);
   }
   act(time, level) {
+    // тут ошибка (newPosition не определено)
+    // и форматирование поехало
     if (level.obstacleAt(newPosition, this.size) === undefined) {
       this.position = newPosition(time);
   } else {
