@@ -8,10 +8,10 @@ class Vector {
   plus(vector) {
     // лучше сначала проверять аргументы, а потом писать основной код
     // (как ниже, в конктрукторе класса Actor)
-    if (vector instanceof Vector) {
-      return new Vector(this.x + vector.x, this.y + vector.y);
-    }
+    if (!(vector instanceof Vector)) {
     throw new Error('Можно прибавлять к вектору только вектор типа Vector');
+    }
+      return new Vector(this.x + vector.x, this.y + vector.y);
   }
   times(factor) {
     return new Vector(this.x * factor, this.y * factor);
@@ -27,7 +27,8 @@ class Actor {
     this.size = size;
     this.speed = speed;
     // act должен быть методом класса
-    this.act = function() {};
+  }
+  act() {
   }
   get left() {
     return this.pos.x;
@@ -103,17 +104,14 @@ class Level {
   removeActor(actor) {
     // если значение присваивается переменной 1 раз,
     // то лучше использовать const
-    let index = this.actors.indexOf(actor);
+    const index = this.actors.indexOf(actor);
     if (index >= 0) {
         this.actors.splice(index, 1);
     }
   }
   noMoreActors(actorType) {
     // лучше использовать стрелочную функцию
-    return !this.actors.some(function (actor) {
-      // лучше всегда использовать ===
-      return actorType == actor.type;
-    })
+    return !this.actors.some(el => el.actorType === actorType)
   }
   playerTouched(obstruction, movingObject) {
     if (this.status) {
@@ -143,14 +141,15 @@ class LevelParser {
     if(symbol === 'x') {
       return 'wall';
     // если if заканчивается на return, то else можно не писать
-    } else if (symbol === '!') {
+    }
+    if (symbol === '!') {
       return 'lava';
     }
   }
-  createGrid(stringsArray) {
+  createGrid(plan) {
     // преобразовывать строки в массивы лучше с помощью метода split
     // так понятнее, что в переменной строка
-    return stringsArray.map(string => [...string].map(newString => this.obstacleFromSymbol(newString)));
+    return plan.map(string => string.split('')).map(string => string.map(string => this.obstacleFromSymbol(string))); 
   }
   createActors(stringsArray) {
     const finalArray = [];
@@ -175,19 +174,17 @@ class LevelParser {
 }
 
 class Fireball extends Actor {
-  constructor(position = new Vector(0, 0), speed = new Vector(0, 0)) {
-      super(position, speed);
+  constructor(pos = new Vector(0, 0), speed = new Vector(0, 0)) {
+    super(pos, new Vector(1, 1), speed);
       // поле для позиции это pos
-      this.position = position;
       // pos, size, speed должны задаваться через
       // вызов родительского конструктора
-      this.speed = speed;
   }
   get type() {
       return 'fireball';
   }
   getNextPosition(time = 1) {
-    return this.speed.times(time).plus(this.position);
+    return this.speed.times(time).plus(this.pos);
   }
   handleObstacle() {
     this.speed = this.speed.times(-1);
@@ -195,18 +192,19 @@ class Fireball extends Actor {
   act(time, level) {
     // тут ошибка (newPosition не определено)
     // и форматирование поехало
-    if (level.obstacleAt(newPosition, this.size) === undefined) {
-      this.position = newPosition(time);
-  } else {
+    const newPosition = this.getNextPosition(time);
+    if (level.obstacleAt(newPosition, this.size)) {
       this.handleObstacle();
+    } else {
+      this.pos = this.getNextPosition(time);
     }
   }
 }
 
 class HorizontalFireball extends Fireball {
-  constructor(position = new Vector(0, 0)) {
+  constructor(pos = new Vector(0, 0)) {
     const speed = new Vector(2, 0);
-    super(position, speed);
+    super(pos , speed);
   }
   get type() {
     return 'fireball';
@@ -214,9 +212,9 @@ class HorizontalFireball extends Fireball {
 }
 
 class VerticalFireball extends Fireball {
-  constructor(position = new Vector(0, 0)) {
+  constructor(pos = new Vector(0, 0)) {
     const speed = new Vector(0, 2);
-    super(position, speed);
+    super(pos, speed);
   }
   get type() {
     return 'fireball';
@@ -224,25 +222,25 @@ class VerticalFireball extends Fireball {
 }
 
 class FireRain extends Fireball {
-  constructor(position = new Vector(0, 0)) {
+  constructor(pos = new Vector(0, 0)) {
     const speed = new Vector(0, 3);
-    super(position, speed);
-    this.startPosition = this.position;
+    super(pos, speed);
+    this.startPosition = this.pos;
   }
   handleObstacle() {
-    this.position = this.startPosition;
+    this.pos = this.startPosition;
   }
 }
 
 class Coin extends Actor {
-  constructor(position = new Vector(0, 0)) {
+  constructor(pos = new Vector(0, 0)) {
     const size = new Vector(0.6, 0.6);
-    const currentPosition = position.plus(new Vector(0.2, 0.1));
+    const currentPosition = pos.plus(new Vector(0.2, 0.1));
     super(currentPosition, size);
     this.springSpeed = 8;
     this.springDist = 0.07;
     this.spring = 2 * Math.PI;
-    this.basicPosition = this.position
+    this.basicPosition = this.pos
   }
   get type() {
     return 'coin';
@@ -256,17 +254,17 @@ class Coin extends Actor {
   }
   getNextPosition(time) {
     this.updateSpring(time);
-    this.position = this.basicPosition.plus(this.getSpringVector());
-    return this.position;
+    this.pos = this.basicPosition.plus(this.getSpringVector());
+    return this.pos;
   }
   act(time) {
-    this.position = this.getNextPosition(time);
+    this.pos = this.getNextPosition(time);
   }
 }
 
 class Player extends Actor {
-  constructor(position = new Vector()) {
-    super(position.plus(new Vector(0, -0.5)), new Vector(0.8, 1.5), new Vector(0, 0));
+  constructor(pos = new Vector()) {
+    super(pos.plus(new Vector(0, -0.5)), new Vector(0.8, 1.5), new Vector(0, 0));
   }
   get type() {
     return 'player';
