@@ -105,7 +105,7 @@ class Level {
     }
   }
   noMoreActors(actorType) {
-      return !this.actors.some(el => el.type === actorType);
+    return !this.actors.some(el => el.type === actorType);
   }
   playerTouched(obstruction, movingObject) {
     if (this.status) {
